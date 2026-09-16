@@ -1,0 +1,23 @@
+use crate::application::dto::toll_road_dto::TollRoadResponse;
+use crate::error::AppError;
+use crate::infrastructure::repositories::toll_road_repo::TollRoadRepository;
+
+#[derive(Clone)]
+pub struct TollRoadService {
+    repo: TollRoadRepository
+}
+
+impl TollRoadService {
+    pub fn new(
+        repo: TollRoadRepository
+    ) -> Self {
+        Self { repo }
+    }
+
+    pub async fn index(&self) -> Result<Vec<TollRoadResponse>, AppError> {
+        let results = self.repo.find()
+            .await?;
+
+        Ok(results.into_iter().map(Into::into).collect())
+    }
+}
