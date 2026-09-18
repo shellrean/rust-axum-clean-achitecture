@@ -13,9 +13,7 @@ impl TollRoadRepository {
     }
 
     pub async fn find(&self) -> Result<Vec<TollRoads>, AppError> {
-        let rows = sqlx::query(
-            "SELECT id, code, name, created_at, updated_at FROM toll_roads ORDER BY created_at DESC"
-        )
+        let rows = sqlx::query(include_str!("sql/toll_road_repo_find.sql"))
             .fetch_all(&self.pool)
             .await?;
 

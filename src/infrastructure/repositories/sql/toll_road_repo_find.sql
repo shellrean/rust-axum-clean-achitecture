@@ -1,0 +1,1 @@
+SELECT id, code, name, created_at, updated_at FROM toll_roads ORDER BY created_at DESC
