@@ -1,6 +1,7 @@
-use axum::Router;
+use axum::{middleware, Router};
 use axum::routing::get;
 use crate::interface::handlers::{test_handlers, toll_road_handlers};
+use crate::interface::layers::duration_log;
 use crate::interface::state::AppState;
 
 pub fn create_router(state: AppState) -> Router {
@@ -8,4 +9,5 @@ pub fn create_router(state: AppState) -> Router {
         .route("/test", get(test_handlers::test))
         .route("/toll-roads", get(toll_road_handlers::index))
         .with_state(state)
+        .layer(middleware::from_fn(duration_log::handle))
 }
