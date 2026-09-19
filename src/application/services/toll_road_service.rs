@@ -1,15 +1,17 @@
+use std::sync::Arc;
 use crate::application::dto::toll_road_dto::TollRoadResponse;
+use crate::domain::repositories::TollRoadRepository;
 use crate::error::AppError;
-use crate::infrastructure::repositories::toll_road_repo::TollRoadRepository;
+use crate::infrastructure::repositories::toll_road_repo::TollRoadPostgresRepository;
 
 #[derive(Clone)]
 pub struct TollRoadService {
-    repo: TollRoadRepository
+    repo: Arc<dyn TollRoadRepository>
 }
 
 impl TollRoadService {
     pub fn new(
-        repo: TollRoadRepository
+        repo: Arc<dyn TollRoadRepository>
     ) -> Self {
         Self { repo }
     }

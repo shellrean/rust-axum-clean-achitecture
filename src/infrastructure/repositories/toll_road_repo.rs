@@ -1,18 +1,23 @@
-use std::error::Error;
+use async_trait::async_trait;
 use sqlx::{PgPool, Row};
 use crate::domain::entities::toll_roads::TollRoads;
+use crate::domain::repositories::TollRoadRepository;
 use crate::error::AppError;
 
 #[derive(Clone)]
-pub struct TollRoadRepository {
+pub struct TollRoadPostgresRepository {
     pool: PgPool
 }
-impl TollRoadRepository {
+
+impl TollRoadPostgresRepository {
     pub fn new(pool: PgPool) -> Self {
         Self { pool }
     }
+}
 
-    pub async fn find(&self) -> Result<Vec<TollRoads>, AppError> {
+#[async_trait]
+impl TollRoadRepository for TollRoadPostgresRepository {
+    async fn find(&self) -> Result<Vec<TollRoads>, AppError> {
         let rows = sqlx::query(include_str!("sql/toll_road_repo_find.sql"))
             .fetch_all(&self.pool)
             .await?;

@@ -5,6 +5,7 @@ pub mod application;
 pub mod error;
 
 use std::error::Error;
+use std::sync::Arc;
 use tracing_subscriber::util::SubscriberInitExt;
 use crate::application::services::toll_road_service;
 use crate::infrastructure::database::{create_pool, run_migrations};
@@ -31,8 +32,8 @@ async fn main() -> Result<(), Box<dyn Error+Send + Sync>> {
         }
     };
 
-    let toll_road_repository = toll_road_repo::TollRoadRepository::new(pool.clone());
-    let toll_road_service = toll_road_service::TollRoadService::new(toll_road_repository);
+    let toll_road_repository = toll_road_repo::TollRoadPostgresRepository::new(pool.clone());
+    let toll_road_service = toll_road_service::TollRoadService::new(Arc::new(toll_road_repository));
 
     let state = AppState {
         toll_service: toll_road_service,
