@@ -1,2 +1,17 @@
 ### Test sample
 GET http://localhost:9090/toll-roads
+
+### Login
+POST http://localhost:9090/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@localhost",
+  "password": "123"
+}
+
+### Me
+GET http://localhost:9090/auth/me
+
+### Logout
+POST http://localhost:9090/auth/logout

@@ -1,6 +1,8 @@
+use crate::application::services::auth_service::AuthService;
 use crate::application::services::toll_road_service::TollRoadService;
 
 #[derive(Clone)]
 pub struct AppState {
-    pub toll_service: TollRoadService
+    pub toll_service: TollRoadService,
+    pub auth_service: AuthService,
 } 

@@ -14,13 +14,19 @@ pub struct ErrorDetail {
 #[derive(Debug, Error)]
 pub enum AppError {
     #[error("database error: {0}")]
-    Database(String)
+    Database(String),
+    #[error("authentication error: {0}")]
+    Authentication(String),
 }
 
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, code, message) = match self {
-            AppError::Database(msg) => (StatusCode::INTERNAL_SERVER_ERROR, String::from("99"), String::from("internal server database issue"))
+            AppError::Database(msg) => (StatusCode::INTERNAL_SERVER_ERROR, String::from("99"), String::from("internal server database issue")),
+            AppError::Authentication(msg) => {
+                tracing::error!("authentication error: {}", msg);
+                (StatusCode::UNAUTHORIZED, String::from("authentication error"), msg)
+            }
         };
 
         let body = ErrorDetail {

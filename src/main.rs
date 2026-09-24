@@ -7,9 +7,9 @@ pub mod error;
 use std::error::Error;
 use std::sync::Arc;
 use tracing_subscriber::util::SubscriberInitExt;
-use crate::application::services::toll_road_service;
+use crate::application::services::{auth_service, toll_road_service};
 use crate::infrastructure::database::{create_pool, run_migrations};
-use crate::infrastructure::repositories::toll_road_repo;
+use crate::infrastructure::repositories::{toll_road_repo, user_repo};
 use crate::interface::routes::create_router;
 use crate::interface::state::AppState;
 
@@ -34,9 +34,12 @@ async fn main() -> Result<(), Box<dyn Error+Send + Sync>> {
 
     let toll_road_repository = toll_road_repo::TollRoadPostgresRepository::new(pool.clone());
     let toll_road_service = toll_road_service::TollRoadService::new(Arc::new(toll_road_repository));
+    let user_repository = user_repo::UserRepositoryPostgres::new(pool.clone());
+    let auth_service = auth_service::AuthService::new(Arc::new(user_repository));
 
     let state = AppState {
         toll_service: toll_road_service,
+        auth_service,
     };
 
     let router = create_router(state);
