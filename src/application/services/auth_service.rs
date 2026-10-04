@@ -1,16 +1,21 @@
 use std::sync::Arc;
+use tokio::sync::Semaphore;
 use crate::application::dto::auth_dto::{LoginInfo, LoginRequest};
 use crate::domain::repositories::UserRepository;
 use crate::error::AppError;
 
 #[derive(Clone)]
 pub struct AuthService {
-    repo: Arc<dyn UserRepository>
+    repo: Arc<dyn UserRepository>,
+    semaphore: Arc<Semaphore>,
 }
 
 impl AuthService {
     pub fn new(repo: Arc<dyn UserRepository>) -> Self {
-        Self { repo }
+        Self {
+            repo,
+            semaphore: Arc::new(Semaphore::new(10)),
+        }
     }
     
     pub async fn login(&self, req: LoginRequest) -> Result<LoginInfo, AppError> {
@@ -21,8 +26,17 @@ impl AuthService {
         }
         
         let user = user_opt.unwrap();
-        
-        let is_verified = bcrypt::verify(&req.password, &user.password)
+
+        let permit = self.semaphore.clone().acquire_owned().await
+            .map_err(|_| AppError::Authentication("failed to acquire semaphore".into()))?;
+
+        let is_verified = tokio::task::spawn_blocking(move || {
+            let result = bcrypt::verify(&req.password, &user.password);
+            drop(permit);
+            result
+        })
+            .await
+            .map_err(|e| AppError::Authentication(e.to_string()))?
             .map_err(|e| AppError::Authentication(e.to_string()))?;
         
         if !is_verified {
