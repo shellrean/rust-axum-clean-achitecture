@@ -4,6 +4,7 @@ use axum::Json;
 use tower_sessions::Session;
 use crate::application::dto::auth_dto::{LoginInfo, LoginRequest};
 use crate::error::AppError;
+use crate::interface::layers::CURRENT_USER;
 use crate::interface::state::AppState;
 
 pub async fn login(
@@ -21,14 +22,9 @@ pub async fn login(
     Ok(Json(result))
 }
 
-pub async fn me(
-    session: Session
-)-> Result<Json<LoginInfo>, AppError> {
-    let user_opt: Option<LoginInfo> = session.get("user_info").await.unwrap();
-    if let Some(user) = user_opt {
-        return Ok(Json(user))
-    }
-    Err(AppError::Authentication("issue in insert session".into()))
+pub async fn me()-> Result<Json<LoginInfo>, AppError> {
+    let user = CURRENT_USER.with(|user| user.clone());
+    Ok(Json(user))
 }
 
 pub async fn logout(session: Session) -> Result<StatusCode, AppError> {
