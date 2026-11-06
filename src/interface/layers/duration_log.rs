@@ -11,7 +11,7 @@ pub async fn handle(req: Request, next: Next) -> Response {
     let response = next.run(req).await;
 
     let elapsed = start.elapsed();
-    println!("Request [{} {}] {:?}", method, url, elapsed);
+    tracing::info!("Request [{} {}] {:?}", method, url, elapsed);
 
     response
 }

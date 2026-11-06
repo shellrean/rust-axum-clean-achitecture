@@ -6,7 +6,6 @@ pub mod error;
 
 use std::error::Error;
 use std::sync::Arc;
-use tracing_subscriber::util::SubscriberInitExt;
 use crate::application::services::{auth_service, toll_road_service};
 use crate::infrastructure::database::{create_pool, run_migrations};
 use crate::infrastructure::repositories::{toll_road_repo, user_repo};
@@ -15,9 +14,9 @@ use crate::interface::state::AppState;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error+Send + Sync>> {
+    dotenv::dotenv().ok();
 
-    tracing_subscriber::registry()
-        .init();
+    tracing_subscriber::fmt::init();
 
     let pool = match create_pool().await {
         Ok(p) => {
@@ -44,8 +43,13 @@ async fn main() -> Result<(), Box<dyn Error+Send + Sync>> {
 
     let router = create_router(state);
 
-    let listener = tokio::net::TcpListener::bind("localhost:9090")
+    let server_addr = std::env::var("SERVER_ADDR")
+        .unwrap_or_else(|_| "localhost:9090".to_string());
+
+    let listener = tokio::net::TcpListener::bind(&server_addr)
         .await?;
+
+    tracing::info!("Server listening on {}", server_addr);
 
     axum::serve(listener, router).await?;
 

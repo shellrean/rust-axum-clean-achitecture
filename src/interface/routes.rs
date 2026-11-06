@@ -1,4 +1,4 @@
-use axum::{middleware, Router};
+use axum::Router;
 use axum::routing::{get, post};
 use crate::interface::handlers::{auth_handler, test_handlers, toll_road_handlers};
 use crate::interface::layers;
